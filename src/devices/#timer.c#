@@ -85,18 +85,30 @@ timer_elapsed (int64_t then)
   return timer_ticks () - then;
 }
 
+
+  struct list thread_list;
+  list_init(&thread_list);
+
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
 timer_sleep (int64_t ticks) 
 {
-  // TODO: Implement a tracker of sleepin threads on a list and
+  // TODO: Implement a tracker of sleeping threads on a list and
   // permitting them to run when the right amount of time has elapsed
   int64_t start = timer_ticks ();
 
   ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+
+  
+  // Checks to see if this thread in list
+  if (thread_list.isinterior(thread)){
+
+  }
+  
+  
+  // while (timer_elapsed (start) < ticks) 
+  //thread_yield ();
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
