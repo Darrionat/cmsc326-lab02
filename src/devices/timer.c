@@ -7,7 +7,6 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-#include "devices/list.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -85,18 +84,39 @@ timer_elapsed (int64_t then)
   return timer_ticks () - then;
 }
 
+// Keeps track of which threads are sleeping
+// list sleeping_threads;
+// list_init(&sleeping_threads);
+
+
+
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
 timer_sleep (int64_t ticks) 
 {
-  // TODO: Implement a tracker of sleepin threads on a list and
+  // TODO: Implement a tracker of sleeping threads on a list and
   // permitting them to run when the right amount of time has elapsed
   int64_t start = timer_ticks ();
-
   ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+
+  thread t = current_thread();
+  // If the semaphore exists it must be equal to 0 because thread is running
+  
+  if (t.binSema == NULL){
+    semaphore sema;
+    sema_init(&sema, 0);
+    // Set the thread semaphore to this semaphore
+    t.binSema = &sema;
+  }
+  // Set the wakeup time for this thread
+  t.wakeup_time = ticks + timer_ticks();
+  
+  // Add this thread to the list of sleeping threads
+  
+  // list_push_back(&sleeping_threads, &current_thread());
+  // Go to sleep
+  sema_down(&sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -168,15 +188,31 @@ timer_print_stats (void)
 {
   printf ("Timer: %"PRId64" ticks\n", timer_ticks ());
 }
-
+
+
+
 /* Timer interrupt handler. */
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
+  // If the thread wakeup time is < timer_ticks(),
+  // then up on the thread semaphore and remove from the sleeping
+  // thread list
+  thread *curItem = list_head(&sleeping_threads);
+  
+  while (curItem != list_tail(&sleeping_threads)){
+    if (timer_ticks() > *curItem.wakeup_time){
+      sema_up(curItem.binSema);
+      list_remove(curItem);
+      // list_remove(&sleeping_threads, curItem);
+    }
+    curItem = list_next(&sleeping_threads);
+  }
 }
 
+// Checks if time frequency is the same as when started
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
 static bool
