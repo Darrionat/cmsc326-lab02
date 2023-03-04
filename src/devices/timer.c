@@ -97,7 +97,6 @@ timer_sleep (int64_t ticks)
 {
   // TODO: Implement a tracker of sleeping threads on a list and
   // permitting them to run when the right amount of time has elapsed
-  int64_t start = timer_ticks ();
   ASSERT (intr_get_level () == INTR_ON);
 
   struct thread *t = thread_current();
@@ -192,6 +191,12 @@ timer_print_stats (void)
 }
 
 
+static void
+check_asleep (struct thread *t){
+  if (timer_ticks() > t->wakeup_time){
+    sema_up(t->binSema);
+  }
+}
 
 /* Timer interrupt handler. */
 static void
@@ -213,12 +218,6 @@ timer_interrupt (struct intr_frame *args UNUSED)
     //    curItem = list_next(&sleeping_threads);
   }
 
-static void
-check_asleep (struct thread *t){
-  if (timer_ticks() > t->wakeup_time){
-    sema_up(t->binSema);
-  }
-}
 
 // Checks if time frequency is the same as when started
 /* Returns true if LOOPS iterations waits for more than one timer
