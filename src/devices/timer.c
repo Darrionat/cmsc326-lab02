@@ -100,17 +100,19 @@ timer_sleep (int64_t ticks)
   int64_t start = timer_ticks ();
   ASSERT (intr_get_level () == INTR_ON);
 
-  thread t = current_thread();
+  struct thread *t = current_thread();
   // If the semaphore exists it must be equal to 0 because thread is running
-  
-  if (t.binSema == NULL){
-    semaphore sema;
+  struct semaphore *sema;
+  if (t->binSema == NULL){
     sema_init(&sema, 0);
     // Set the thread semaphore to this semaphore
-    t.binSema = &sema;
+    t->binSema = &sema;
+  }
+  else{
+    sema = t->binSema;
   }
   // Set the wakeup time for this thread
-  t.wakeup_time = ticks + timer_ticks();
+  t->wakeup_time = ticks + timer_ticks();
   
   // Add this thread to the list of sleeping threads
   
@@ -200,7 +202,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   // If the thread wakeup time is < timer_ticks(), then up on the
   // thread semaphore and remove from the sleeping thread list
 
-  thread_foreach(check_asleep);
+  thread_foreach(check_asleep, NULL);
   
   // thread *curItem = list_head(&sleeping_threads);
   // while (curItem != list_tail(&sleeping_threads)){
@@ -210,12 +212,11 @@ timer_interrupt (struct intr_frame *args UNUSED)
       // }
     //    curItem = list_next(&sleeping_threads);
   }
-}
 
 static void
 check_asleep (struct thread *t){
-  if (timer_ticks() > *t.wakeup_time){
-    sema_up(*t.binSema);
+  if (timer_ticks() > t->wakeup_time){
+    sema_up(t->binSema);
   }
 }
 
