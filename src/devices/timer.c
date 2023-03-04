@@ -104,9 +104,9 @@ timer_sleep (int64_t ticks)
   // If the semaphore exists it must be equal to 0 because thread is running
   struct semaphore *sema;
   if (t->binSema == NULL){
-    sema_init(&sema, 0);
+    sema_init(sema, 0);
     // Set the thread semaphore to this semaphore
-    t->binSema = &sema;
+    t->binSema = sema;
   }
   else{
     sema = t->binSema;
@@ -118,7 +118,7 @@ timer_sleep (int64_t ticks)
   
   // list_push_back(&sleeping_threads, &current_thread());
   // Go to sleep
-  sema_down(&sema);
+  sema_down(sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
