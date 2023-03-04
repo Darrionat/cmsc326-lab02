@@ -101,14 +101,14 @@ timer_sleep (int64_t ticks)
 
   struct thread *t = thread_current();
   // If the semaphore exists it must be equal to 0 because thread is running
-  struct semaphore *sema;
+  struct semaphore sema;
   if (t->binSema == NULL){
-    sema_init(sema, 0);
+    sema_init(&sema, 0);
     // Set the thread semaphore to this semaphore
-    t->binSema = sema;
+    t->binSema = &sema;
   }
   else{
-    sema = t->binSema;
+    sema = *(t->binSema);
   }
   // Set the wakeup time for this thread
   t->wakeup_time = ticks + timer_ticks();
@@ -118,7 +118,7 @@ timer_sleep (int64_t ticks)
   
   // list_push_back(&sleeping_threads, &current_thread());
   // Go to sleep
-  sema_down(sema);
+  sema_down(&sema);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -194,7 +194,7 @@ timer_print_stats (void)
 
 static void
 check_asleep (struct thread *t, void *aux){
- if (t-> status == THREAD_SLEEPING && timer_ticks() > t->wakeup_time){
+ if (t-> status != THREAD_SLEEPING && timer_ticks() > t->wakeup_time){
    sema_up(t->binSema);
   }
 }
