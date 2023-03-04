@@ -194,7 +194,7 @@ timer_print_stats (void)
 
 static void
 check_asleep (struct thread *t, void *aux){
- if (t-> status == THREAD_SLEEPING && timer_ticks() > t->wakeup_time){
+ if (t-> status == THREAD_BLOCKED && timer_ticks() > t->wakeup_time){
    t->status = THREAD_READY;
    sema_up(t->binSema);
   }
