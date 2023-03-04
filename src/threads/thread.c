@@ -25,7 +25,7 @@
 static struct list ready_list;
 
 /* List of all sleeping threads. */
-static struct list sleeping_list;
+// static struct list sleeping_list;
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -467,6 +467,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
+  t->wakeup_time = -1;
 
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);

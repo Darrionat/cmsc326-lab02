@@ -12,7 +12,6 @@ enum thread_status
     THREAD_READY,       /* Not running but ready to run. */
     THREAD_BLOCKED,     /* Waiting for an event to trigger. */
     THREAD_DYING,        /* About to be destroyed. */
-    THREAD_SLEEPING  /* If the thread is sleeping* */
   };
 
 /* Thread identifier type.
@@ -104,7 +103,6 @@ struct thread
     struct semaphore *binSema; /* Tracks if this thread is asleep  */
     int64_t wakeup_time; /* The time this thread should wakeup. If in
 			    past, thread is awake. */
-    struct list_elem sleepelem; /* List element for all sleeping threads. */
   };
 
 /* If false (default), use round-robin scheduler.
