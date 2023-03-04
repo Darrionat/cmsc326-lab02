@@ -197,18 +197,25 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-  // If the thread wakeup time is < timer_ticks(),
-  // then up on the thread semaphore and remove from the sleeping
-  // thread list
-  thread *curItem = list_head(&sleeping_threads);
+  // If the thread wakeup time is < timer_ticks(), then up on the
+  // thread semaphore and remove from the sleeping thread list
+
+  thread_foreach(check_asleep);
   
-  while (curItem != list_tail(&sleeping_threads)){
-    if (timer_ticks() > *curItem.wakeup_time){
-      sema_up(curItem.binSema);
-      list_remove(curItem);
-      // list_remove(&sleeping_threads, curItem);
-    }
-    curItem = list_next(&sleeping_threads);
+  // thread *curItem = list_head(&sleeping_threads);
+  // while (curItem != list_tail(&sleeping_threads)){
+    // if (timer_ticks() > *curItem.wakeup_time){
+      // sema_up(curItem.binSema);
+     // list_remove(curItem);
+      // }
+    //    curItem = list_next(&sleeping_threads);
+  }
+}
+
+static void
+check_asleep (struct thread *t){
+  if (timer_ticks() > *t.wakeup_time){
+    sema_up(*t.binSema);
   }
 }
 

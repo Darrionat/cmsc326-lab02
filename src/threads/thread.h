@@ -100,7 +100,7 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
-    semaphore *binSema = NULL; /* Tracks if this thread is asleep  */
+    struct semaphore *binSema; /* Tracks if this thread is asleep  */
     int64_t wakeup_time; /* The time this thread should wakeup. If in
 			    past, thread is awake. */
     struct list_elem sleepelem; /* List element for all sleeping threads. */
