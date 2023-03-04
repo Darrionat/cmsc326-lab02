@@ -192,7 +192,7 @@ timer_print_stats (void)
 
 
 static void
-check_asleep (struct thread *t){
+check_asleep (struct thread *t, void *aux){
  if (t-> status != THREAD_SLEEPING && timer_ticks() > t->wakeup_time){
     sema_up(t->binSema);
   }
@@ -207,7 +207,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   // If the thread wakeup time is < timer_ticks(),then up on the
   // thread semaphore and remove from the sleeping thread list
 
-  thread_foreach(&check_asleep, NULL);
+  thread_foreach(check_asleep, NULL);
   
   // thread *curItem = list_head(&sleeping_threads);
   // while (curItem != list_tail(&sleeping_threads)){
