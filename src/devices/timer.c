@@ -196,7 +196,7 @@ static void
 check_asleep (struct thread *t, void *aux){
  if (t-> status == THREAD_SLEEPING && timer_ticks() > t->wakeup_time){
    sema_up(t->binSema);
-   t->status = THREAD_READY;
+   t->status = THREAD_RUNNING;
   }
 }
 
