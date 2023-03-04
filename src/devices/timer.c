@@ -192,7 +192,10 @@ timer_print_stats (void)
 
 
 static void
-check_asleep (struct thread *){
+check_asleep (struct thread *t){
+  if (t->status != THREAD_SLEEPING){
+    return;
+  }
   if (timer_ticks() > t->wakeup_time){
     sema_up(t->binSema);
   }
