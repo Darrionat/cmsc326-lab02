@@ -112,6 +112,7 @@ timer_sleep (int64_t ticks)
   }
   // Set the wakeup time for this thread
   t->wakeup_time = ticks + timer_ticks();
+  t->status = THREAD_SLEEPING;
   
   // Add this thread to the list of sleeping threads
   
