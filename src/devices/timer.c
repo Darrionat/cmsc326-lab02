@@ -100,7 +100,7 @@ timer_sleep (int64_t ticks)
   int64_t start = timer_ticks ();
   ASSERT (intr_get_level () == INTR_ON);
 
-  struct thread *t = current_thread();
+  struct thread *t = thread_current();
   // If the semaphore exists it must be equal to 0 because thread is running
   struct semaphore *sema;
   if (t->binSema == NULL){
