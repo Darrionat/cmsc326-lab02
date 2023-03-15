@@ -83,7 +83,6 @@ sleeper (void *test_)
 
   /* Make sure we're at the beginning of a timer tick. */
   timer_sleep (1);
-
   for (i = 1; i <= test->iterations; i++) 
     {
       int64_t sleep_until = test->start + i * 10;
