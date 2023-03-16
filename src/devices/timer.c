@@ -100,7 +100,7 @@ timer_sleep (int64_t ticks)
   ASSERT (intr_get_level () == INTR_ON);
 
   struct thread *t = thread_current();
-    // Set the wakeup time for this thread
+    // Set the wakeup time for this thread moved up for better timing
   t->wakeup_time = ticks + timer_ticks();
   // If the semaphore exists it must be equal to 0 because thread is running
   struct semaphore *sema = (struct semaphore*)malloc(sizeof(struct semaphore));
@@ -196,10 +196,12 @@ static void
 check_asleep (struct thread *t, void *aux){
   // Thread is blocked
   // Thread has initialized wakeup time
-  // Wakeup time has passed
+  // Wakeup time has passed or is equal
  if (t-> status == THREAD_BLOCKED && t-> wakeup_time != -1 && timer_ticks() >= t->wakeup_time){
    sema_up(t->binSema);
    t->wakeup_time =-1;
+   t->binSema =NULL;
+   free(t->binSema);
   }
 }
 
@@ -209,7 +211,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-  // If the thread wakeup time is < timer_ticks(),then up on the
+  // If the thread wakeup time is <= timer_ticks(),then up on the
   // thread semaphore and remove from the sleeping thread list
 
   thread_foreach(check_asleep, NULL);
