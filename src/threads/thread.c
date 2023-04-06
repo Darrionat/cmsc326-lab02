@@ -162,6 +162,7 @@ void thread_tick(void)
 
     intr_yield_on_return();
     // No need to demote if priority is already zero
+    if(!thread_mlfqs) return;
     if (t->priority == 0)
       return;
 
