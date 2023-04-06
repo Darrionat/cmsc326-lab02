@@ -515,20 +515,19 @@ next_thread_to_run(void)
   if (list_empty(&ready_list))
     return idle_thread;
 
-  if (thread_mlfqs)
+  if (!thread_mlfqs)
+    return list_entry(list_pop_front(&ready_list), struct thread, elem);
+
+  struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
+  while (list_empty(&(pq->queue)) && pq->priority > 0)
   {
-    struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
-    while (list_empty(&(pq->queue))&& pq->priority>0)
-    {
-      pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
-    }
-    if (list_empty(&(pq->queue)))
-    {
-      return idle_thread;
-    }
-    return list_entry(list_pop_front(&(pq->queue)), struct thread, elem);
+    pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
   }
-  return list_entry(list_pop_front(&ready_list), struct thread, elem);
+  if (list_empty(&(pq->queue)))
+  {
+    return idle_thread;
+  }
+  return list_entry(list_pop_front(&(pq->queue)), struct thread, elem);
 }
 
 /* Completes a thread switch by activating the new thread's page
