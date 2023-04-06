@@ -111,7 +111,12 @@ void thread_init(void)
   lock_init(&tid_lock);
   list_init(&ready_list);
   list_init(&all_list);
-  mlfqs_init();
+  if (thread_mlfqs)
+  {
+    mlfqs_init();
+  }
+  
+  
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread();
   init_thread(initial_thread, "main", PRI_DEFAULT);
