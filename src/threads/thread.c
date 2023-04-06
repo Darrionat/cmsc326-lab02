@@ -115,8 +115,7 @@ void thread_init(void)
   {
     mlfqs_init();
   }
-  
-  
+
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread();
   init_thread(initial_thread, "main", PRI_DEFAULT);
@@ -162,7 +161,8 @@ void thread_tick(void)
 
     intr_yield_on_return();
     // No need to demote if priority is already zero
-    if(!thread_mlfqs) return;
+    if (!thread_mlfqs)
+      return;
     if (t->priority == 0)
       return;
 
@@ -360,7 +360,21 @@ void thread_yield(void)
 
   old_level = intr_disable();
   if (cur != idle_thread)
-    list_push_back(&ready_list, &cur->elem);
+  {
+    if (!thread_mlfqs)
+    {
+      list_push_back(&ready_list, &cur->elem);
+    }
+    else
+    {
+      struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
+      while (pq->priority != cur->priority)
+      {
+        pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
+      }
+      list_push_back(&(pq->queue), &cur->elem);
+    }
+  }
   cur->status = THREAD_READY;
   schedule();
   intr_set_level(old_level);
