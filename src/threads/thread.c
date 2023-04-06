@@ -96,7 +96,7 @@ mlfqs_init(void)
 {
   ASSERT(thread_mlfqs);
   list_init(&mlfqs_list);
-  for(int i = 19; i>=0;i--)
+  for(int i = PRI_MAX; i>=0;i--)
   {
     struct priority_queue *pq = (struct priority_queue*)(malloc(sizeof(struct priority_queue)));
     list_init(&(pq->queue));
@@ -259,7 +259,21 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  if(thread_mlfqs)
+  {
+    struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
+    while (pq->priority!=t->priority)
+    {
+      pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
+    }
+    
+    list_push_front(&(pq->queue),&t->elem);
+  }
+  else
+  {
+    list_push_back (&ready_list, &t->elem);
+  }
+
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
