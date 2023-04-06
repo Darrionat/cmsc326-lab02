@@ -24,6 +24,10 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+/*a new mlfqs list*/
+
+static struct list mlfqs_list;
+
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
@@ -84,6 +88,24 @@ static tid_t allocate_tid (void);
 
    It is not safe to call thread_current() until this function
    finishes. */
+
+/*initialiing the mlfqs*/
+
+void
+mlfqs_init(void)
+{
+  ASSERT(thread_mlfqs);
+  list_init(&mlfqs_list);
+  for(int i = 19; i>=0;i--)
+  {
+    struct priority_queue *pq = (struct priority_queue*)(malloc(sizeof(struct priority_queue)));
+    list_init(&(pq->queue));
+    pq->priority=i;
+    list_push_back(&mlfqs_list,&(pq->elem));
+  }
+}
+
+
 void
 thread_init (void) 
 {
@@ -92,7 +114,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
-
+  mlfqs_init();
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);

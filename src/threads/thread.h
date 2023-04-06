@@ -21,8 +21,8 @@ typedef int tid_t;
 
 /* Thread priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
-#define PRI_DEFAULT 31                  /* Default priority. */
-#define PRI_MAX 63                      /* Highest priority. */
+#define PRI_DEFAULT 19                   /*Default priority. */
+#define PRI_MAX 19                      /* Highest priority. */
 
 /* A kernel thread or user process.
 
@@ -98,12 +98,23 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
 #endif
 
-    /* Owned by thread.c. */
-    unsigned magic;                     /* Detects stack overflow. */
+                       /* Detects stack overflow. */
     struct semaphore *binSema; /* Tracks if this thread is asleep  */
     int64_t wakeup_time; /* The time this thread should wakeup. If in
 			    past, thread is awake. */
+   /* Owned by thread.c. */
+    unsigned magic;  
   };
+
+  /*structure for priority queue*/
+
+  struct priority_queue
+  {
+      struct list queue;
+      int priority;
+      struct list_elem elem; 
+  };
+  
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
