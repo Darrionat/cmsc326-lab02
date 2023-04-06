@@ -108,12 +108,12 @@ struct thread
 
   /*structure for priority queue*/
 
-  struct priority_queue
-  {
-      struct list queue;
-      int priority;
-      struct list_elem elem; 
-  };
+//   struct priority_queue
+//   {
+//       struct list queue;
+//       int priority;
+//       struct list_elem elem; 
+//   };
   
 
 /* If false (default), use round-robin scheduler.
