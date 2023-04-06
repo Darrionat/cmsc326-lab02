@@ -26,7 +26,7 @@ static struct list ready_list;
 
 /*a new mlfqs list*/
 
-static struct list* mlfqs_list[PRI_MAX+1];
+static struct list mlfqs_list[PRI_MAX + 1];
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -102,7 +102,7 @@ void mlfqs_init(void)
   //   pq->priority = i;
   //   list_push_back(&mlfqs_list, &(pq->elem));
   // }
-  for(int i =0; i<=PRI_MAX;i++)
+  for (int i = 0; i <= PRI_MAX; i++)
   {
     list_init(&mlfqs_list[i]);
   }
@@ -166,25 +166,24 @@ void thread_tick(void)
 
     intr_yield_on_return();
     // No need to demote if priority is already zero
-    if(thread_mlfqs)
+    if (thread_mlfqs)
     {
-    if (t->priority == 0)
-      return;
-    // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
-    // while (pq->priority != t->priority)
-    // {
-    //   pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
-    // }
-    // pq is the priority queue that t is in
-    // Remove from current priority queue
-    list_remove(&(t->elem));
-    // Push thread to proper pq list
-    // pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem); // get lower priority
-    list_push_back(&(mlfqs_list[t->priority]), &t->elem);
-    // Lower thread priority
-    t->priority = t->priority - 1;
+      if (t->priority == 0)
+        return;
+      // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
+      // while (pq->priority != t->priority)
+      // {
+      //   pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
+      // }
+      // pq is the priority queue that t is in
+      // Remove from current priority queue
+      list_remove(&(t->elem));
+      // Push thread to proper pq list
+      // pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem); // get lower priority
+      list_push_back(&(mlfqs_list[t->priority]), &t->elem);
+      // Lower thread priority
+      t->priority = t->priority - 1;
     }
-
   }
 }
 
@@ -364,14 +363,13 @@ void thread_yield(void)
 
   old_level = intr_disable();
   if (cur != idle_thread)
-    if(thread_mlfqs)
+    if (thread_mlfqs)
     {
       list_push_back(&(mlfqs_list[cur->priority]), &cur->elem);
     }
     else
     {
       list_push_back(&ready_list, &cur->elem);
-
     }
   cur->status = THREAD_READY;
   schedule();
@@ -399,7 +397,7 @@ void thread_set_priority(int new_priority)
 {
   thread_current()->priority = new_priority;
   list_remove(&(thread_current()->elem));
-  list_push_back(&(mlfqs_list[new_priority]),&(thread_current()->elem));
+  list_push_back(&(mlfqs_list[new_priority]), &(thread_current()->elem));
 }
 
 /* Returns the current thread's priority. */
@@ -554,11 +552,12 @@ alloc_frame(struct thread *t, size_t size)
 static struct thread *
 next_thread_to_run(void)
 {
-  if (list_empty(&ready_list))
-    return idle_thread;
 
   if (!thread_mlfqs)
+  {
+    if (list_empty(&ready_list)) return idle_thread;
     return list_entry(list_pop_front(&ready_list), struct thread, elem);
+  }
 
   // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
   // while (list_empty(&(pq->queue)) && pq->priority > 0)
@@ -570,11 +569,12 @@ next_thread_to_run(void)
   //   return idle_thread;
   // }
   int i = PRI_MAX;
-  while(list_empty(&mlfqs_list[i])&&i>=0)
+  while (list_empty(&mlfqs_list[i]) && i >= 0)
   {
     i--;
   }
-  if(i ==-1)  return idle_thread;
+  if (i == -1)
+    return idle_thread;
   return list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
 }
 
