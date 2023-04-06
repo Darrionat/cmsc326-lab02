@@ -153,7 +153,29 @@ void thread_tick(void)
 
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
+  {
+
     intr_yield_on_return();
+    // No need to demote if priority is already zero
+    if (t->priority == 0)
+      return;
+
+    struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
+    while (pq->priority != t->priority)
+    {
+      pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
+    }
+    // pq is the priority queue that t is in
+    // Remove from current priority queue
+    list_remove(&(t->elem));
+
+    // Push thread to proper pq list
+    pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem); // get lower priority
+    list_push_back(&(pq->queue), &t->elem);
+
+    // Lower thread priority
+    t->priority = t->priority - 1;
+  }
 }
 
 /* Prints thread statistics. */
