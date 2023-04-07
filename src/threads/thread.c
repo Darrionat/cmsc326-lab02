@@ -167,7 +167,7 @@ void thread_tick(void)
     kernel_ticks++;
 
   // No need to demote if priority is already zero
-  if (++thread_ticks >= TIME_SLICE)
+  if (((++thread_ticks >= TIME_SLICE) && !thread_mlfqs) || ((++thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority - 1)) && thread_mlfqs))
   {
     intr_yield_on_return();
   }
@@ -352,17 +352,12 @@ void thread_yield(void)
   {
     if (thread_mlfqs)
     {
-      if (thread_ticks % (PRI_MAX - cur->priority + 1) == 0)
+      if (cur->priority == 0)
       {
-        if (cur->priority == 0)
-        {
-          list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
-        }
-        else
-          list_push_back(&(mlfqs_list[(--cur->priority)]), &cur->elem);
+        list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
       }
       else
-      list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
+        list_push_back(&(mlfqs_list[(--cur->priority)]), &cur->elem);
     }
     else
     {

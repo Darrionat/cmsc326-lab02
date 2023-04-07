@@ -102,7 +102,6 @@ simple_thread_func (void *data_)
       lock_acquire (data->lock);
 
       *(*data->op)++ = data->id;
-      printf("got thread %d\n",data->id);
       lock_release (data->lock);
       thread_yield ();
     }
