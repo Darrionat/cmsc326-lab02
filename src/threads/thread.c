@@ -169,7 +169,7 @@ void thread_tick(void)
   // No need to demote if priority is already zero
   if (thread_mlfqs)
   { /*{ Enforce preemption. */
-    if (++thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority + 1))
+    if (++thread_ticks % (TIME_SLICE * (PRI_MAX - t->priority + 1) ) ==0)
     {
 
       intr_yield_on_return();
