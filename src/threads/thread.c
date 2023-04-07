@@ -178,10 +178,16 @@ void thread_tick(void)
         return;
       // Remove from current priority queue
       list_remove(&(t->elem));
-      // Push thread to proper pq list
-      list_push_back(&(mlfqs_list[t->priority]), &t->elem);
       // Lower thread priority
       t->priority = t->priority - 1;
+      // Push thread to proper pq list
+      list_push_back(&(mlfqs_list[t->priority]), &t->elem);
+      if (all_thread_reset)
+      {
+        reset_all_threads_priority();
+        all_thread_reset = false;
+      }
+      
     }
   }
   else if (++thread_ticks >= TIME_SLICE)

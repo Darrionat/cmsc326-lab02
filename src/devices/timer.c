@@ -208,7 +208,7 @@ timer_interrupt(struct intr_frame *args UNUSED)
 
   if (timer_ticks() % MLFQS_PQ_RESET_TIME == 0)
   {
-    reset_all_threads_priority();
+    all_thread_reset = true;
   }
 
   // thread *curItem = list_head(&sleeping_threads);
