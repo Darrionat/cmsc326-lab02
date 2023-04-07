@@ -272,17 +272,6 @@ void thread_unblock(struct thread *t)
   ASSERT(t->status == THREAD_BLOCKED);
   if (thread_mlfqs)
   {
-    // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
-    // while (pq->priority != t->priority)
-    // {
-    //   pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
-    // }
-    // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
-    // while (pq->priority != t->priority)
-    // {
-    //   pq = list_entry(list_next(&(pq->elem)), struct priority_queue, elem);
-    // }
-
     list_push_back(&(mlfqs_list[t->priority]), &t->elem);
   }
   else
