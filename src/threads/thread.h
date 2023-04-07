@@ -20,9 +20,10 @@ typedef int tid_t;
 #define TID_ERROR ((tid_t)-1) /* Error value for tid_t. */
 
 /* Thread priorities. */
-#define PRI_MIN 0      /* Lowest priority. */
-#define PRI_DEFAULT 19 /*Default priority. */
-#define PRI_MAX 19     /* Highest priority. */
+#define PRI_MIN 0              /* Lowest priority. */
+#define PRI_DEFAULT 19         /*Default priority. */
+#define PRI_MAX 19             /* Highest priority. */
+#define MLFQS_PQ_RESET_TIME 50 /* # of ticks until all threads recieve max priority */
 
 /* A kernel thread or user process.
 
@@ -122,6 +123,8 @@ extern bool thread_mlfqs;
 
 void thread_init(void);
 void thread_start(void);
+
+void reset_all_threads_priority(void);
 
 void thread_tick(void);
 void thread_print_stats(void);

@@ -55,7 +55,7 @@ static long long kernel_ticks; /* # of timer ticks in kernel threads. */
 static long long user_ticks;   /* # of timer ticks in user programs. */
 
 /* Scheduling. */
-#define TIME_SLICE 4          /* # of timer ticks to give each thread. */
+#define TIME_SLICE 1          /* # of timer ticks to give each thread. */
 static unsigned thread_ticks; /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -134,6 +134,20 @@ void thread_start(void)
 
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down(&idle_started);
+}
+static void
+reset_priority(struct thread *t, void *aux)
+{
+  t->priority = PRI_MAX;
+  // Remove from current priority queue
+  list_remove(&(t->elem));
+  // Push thread to proper pq list
+  list_push_back(&(mlfqs_list[PRI_MAX]), &t->elem);
+}
+
+void reset_all_threads_priority(void)
+{
+  thread_foreach(reset_priority, NULL);
 }
 
 /* Called by the timer interrupt handler at each timer tick.
