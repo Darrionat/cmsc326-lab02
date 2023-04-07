@@ -55,7 +55,7 @@ static long long kernel_ticks; /* # of timer ticks in kernel threads. */
 static long long user_ticks;   /* # of timer ticks in user programs. */
 
 /* Scheduling. */
-#define TIME_SLICE 1          /* # of timer ticks to give each thread. */
+#define TIME_SLICE 4          /* # of timer ticks to give each thread. */
 static unsigned thread_ticks; /* # of timer ticks since last yield. */
 
 /* If false (default), use round-robin scheduler.
@@ -152,14 +152,14 @@ void thread_tick(void)
   else
     kernel_ticks++;
 
-  /* Enforce preemption. */
-  if (++thread_ticks >= TIME_SLICE)
+  // No need to demote if priority is already zero
+  if (thread_mlfqs)
+  {  /*{ Enforce preemption. */
+  if (++thread_ticks >= TIME_SLICE*(PRI_MAX-t->priority +1))
   {
 
     intr_yield_on_return();
-    // No need to demote if priority is already zero
-    if (thread_mlfqs)
-    {
+    
       if (t->priority == 0)
         return;
       // struct priority_queue *pq = list_entry(list_begin(&mlfqs_list), struct priority_queue, elem);
@@ -177,6 +177,12 @@ void thread_tick(void)
       t->priority = t->priority - 1;
     }
   }
+  else if (++thread_ticks >= TIME_SLICE)
+  {
+    intr_yield_on_return();
+  }
+  
+
 }
 
 /* Prints thread statistics. */
