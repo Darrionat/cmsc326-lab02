@@ -109,10 +109,6 @@ void timer_sleep(int64_t ticks)
   {
     sema = (t->binSema);
   }
-
-  // Add this thread to the list of sleeping threads
-
-  // list_push_back(&sleeping_threads, &current_thread());
   // Go to sleep
   sema_down(sema);
 }

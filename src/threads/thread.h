@@ -107,15 +107,6 @@ struct thread
    unsigned magic;
 };
 
-/*structure for priority queue*/
-
-//   struct priority_queue
-//   {
-//       struct list queue;
-//       int priority;
-//       struct list_elem elem;
-//   };
-
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
