@@ -156,6 +156,7 @@ reset_priority_queue(struct thread *t, void *aux)
     list_insert_ordered(&(mlfqs_list[PRI_MAX]), &t->elem, value_less, NULL);
     //list_push_back(&(mlfqs_list[PRI_MAX]), &t->elem);
   }
+  t->priority = PRI_MAX;
 }
 static void
 reset_priority_value(struct thread *t, void *aux)
@@ -168,7 +169,7 @@ void reset_all_threads_priority(void)
   enum intr_level old_level;
   old_level = intr_disable();
   thread_foreach(reset_priority_queue, NULL);
-  thread_foreach(reset_priority_value, NULL);
+  //thread_foreach(reset_priority_value, NULL);
   intr_set_level(old_level);
 }
 // void reset_all_threads_priority(void)
@@ -198,7 +199,7 @@ void thread_tick(void)
     kernel_ticks++;
 
   // No need to demote if priority is already zero
-  if (((++thread_ticks >= TIME_SLICE) && !thread_mlfqs) || ((++thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority + 1)) && thread_mlfqs))
+  if (((++thread_ticks >= TIME_SLICE) && !thread_mlfqs) || ((thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority + 1)) && thread_mlfqs))
   {
     intr_yield_on_return();
   }
