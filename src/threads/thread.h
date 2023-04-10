@@ -21,9 +21,9 @@ typedef int tid_t;
 
 /* Thread priorities. */
 #define PRI_MIN 0              /* Lowest priority. */
-#define PRI_DEFAULT 19         /*Default priority. */
+#define PRI_DEFAULT 10         /*Default priority. */
 #define PRI_MAX 19             /* Highest priority. */
-#define MLFQS_PQ_RESET_TIME 50 /* # of ticks until all threads recieve max priority */
+#define MLFQS_PQ_RESET_TIME 50 /* # of ticks until all threads receive max priority */
 
 /* A kernel thread or user process.
 
@@ -111,7 +111,6 @@ struct thread
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
-static bool all_thread_reset;
 
 void thread_init(void);
 void thread_start(void);

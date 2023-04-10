@@ -65,7 +65,7 @@ test_mlfqs2_fifo (void)
       d->iterations = 0;
       d->lock = &lock; // all share one lock
       d->op = &op;
-      thread_create (name, PRI_DEFAULT - 2, simple_thread_func, d);
+      thread_create (name, PRI_MAX - 2, simple_thread_func, d);
     }
   //print_mlfqs();
   lock_release(&lock); // all threads can run
@@ -100,7 +100,7 @@ simple_thread_func (void *data_)
   for (i = 0; i < ITER_CNT; i++) 
     {
       lock_acquire (data->lock);
-
+      //*(*data->op)++ = thread_current()->priority;
       *(*data->op)++ = data->id;
       lock_release (data->lock);
       thread_yield ();

@@ -135,20 +135,51 @@ void thread_start(void)
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down(&idle_started);
 }
+value_less(const struct list_elem *a_, const struct list_elem *b_,
+           void *aux UNUSED)
+{
+  const struct thread *a = list_entry(a_, struct thread, elem);
+  const struct thread *b = list_entry(b_, struct thread, elem);
+
+  return a->priority > b->priority;
+}
+
 static void
-reset_priority(struct thread *t, void *aux)
+reset_priority_queue(struct thread *t, void *aux)
+{
+
+  if (t->status == THREAD_READY)
+  {
+    // Remove from current priority queue
+    list_remove(&(t->elem));
+    // Push thread to proper pq list
+    list_insert_ordered(&(mlfqs_list[PRI_MAX]), &t->elem, value_less, NULL);
+    //list_push_back(&(mlfqs_list[PRI_MAX]), &t->elem);
+  }
+}
+static void
+reset_priority_value(struct thread *t, void *aux)
 {
   t->priority = PRI_MAX;
-  // Remove from current priority queue
-  list_remove(&(t->elem));
-  // Push thread to proper pq list
-  list_push_back(&(mlfqs_list[PRI_MAX]), &t->elem);
 }
 
 void reset_all_threads_priority(void)
 {
-  thread_foreach(reset_priority, NULL);
+  enum intr_level old_level;
+  old_level = intr_disable();
+  thread_foreach(reset_priority_queue, NULL);
+  thread_foreach(reset_priority_value, NULL);
+  intr_set_level(old_level);
 }
+// void reset_all_threads_priority(void)
+// {
+//   for (int i = PRI_DEFAULT - 1; i >= PRI_MIN; i--)
+//   {
+//     while (!list_empty(&(mlfqs_list[i])))
+//       list_push_back(&(mlfqs_list[PRI_MAX]), list_pop_front(&(mlfqs_list[i])));
+//   }
+//   thread_foreach(reset_priority_value, NULL);
+// }
 
 /* Called by the timer interrupt handler at each timer tick.
    Thus, this function runs in an external interrupt context. */
@@ -167,14 +198,9 @@ void thread_tick(void)
     kernel_ticks++;
 
   // No need to demote if priority is already zero
-  if (((++thread_ticks >= TIME_SLICE) && !thread_mlfqs) || ((++thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority - 1)) && thread_mlfqs))
+  if (((++thread_ticks >= TIME_SLICE) && !thread_mlfqs) || ((++thread_ticks >= TIME_SLICE * (PRI_MAX - t->priority + 1)) && thread_mlfqs))
   {
     intr_yield_on_return();
-  }
-  if (all_thread_reset)
-  {
-    reset_all_threads_priority();
-    all_thread_reset = false;
   }
 }
 
@@ -217,6 +243,7 @@ tid_t thread_create(const char *name, int priority,
     return TID_ERROR;
 
   /* Initialize thread. */
+
   init_thread(t, name, priority);
   tid = t->tid = allocate_tid();
 
@@ -352,7 +379,7 @@ void thread_yield(void)
   {
     if (thread_mlfqs)
     {
-      if (cur->priority == 0)
+      if (cur->priority == 0 || (thread_ticks < TIME_SLICE * (PRI_MAX - cur->priority + 1)))
       {
         list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
       }

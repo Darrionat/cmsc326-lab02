@@ -186,8 +186,9 @@ check_asleep(struct thread *t, void *aux)
   {
     sema_up(t->binSema);
     t->wakeup_time = -1;
-    t->binSema = NULL;
     free(t->binSema);
+    t->binSema = NULL;
+    
   }
 }
 
@@ -202,10 +203,10 @@ timer_interrupt(struct intr_frame *args UNUSED)
 
   thread_foreach(check_asleep, NULL);
 
-  if (timer_ticks() % MLFQS_PQ_RESET_TIME == 0)
-  {
-    all_thread_reset = true;
-  }
+  // if (timer_ticks() % MLFQS_PQ_RESET_TIME == 0)
+  // {
+  //   all_thread_reset = true;
+  // }
 
   // thread *curItem = list_head(&sleeping_threads);
   // while (curItem != list_tail(&sleeping_threads)){
