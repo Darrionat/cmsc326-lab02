@@ -145,7 +145,6 @@ void thread_start(void)
 static void
 reset_priority_value(struct thread *t, void *aux)
 {
-  if(t->status==THREAD_BLOCKED&& t->priority == 0)
     t->priority = PRI_MAX;
 }
 
@@ -153,15 +152,15 @@ void reset_all_threads_priority(void)
 {
   enum intr_level old_level;
   old_level = intr_disable();
-  // for (int i = PRI_MAX - 1; i >= PRI_MIN; i--)
-  // {
-  while (&mlfqs_list[PRI_MIN] != NULL && !list_empty(&mlfqs_list[PRI_MIN]))
+  for (int i = PRI_MAX - 1; i >= PRI_MIN; i--)
   {
-    struct thread *t = list_entry(list_pop_front(&(mlfqs_list[PRI_MIN])), struct thread, elem);
+  while (&mlfqs_list[i] != NULL && !list_empty(&mlfqs_list[i]))
+  {
+    struct thread *t = list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
     list_push_back(&mlfqs_list[PRI_MAX], &t->elem);
     t->priority = PRI_MAX;
   }
-  //}
+  }
   thread_foreach(reset_priority_value, NULL);
   intr_set_level(old_level);
 }
