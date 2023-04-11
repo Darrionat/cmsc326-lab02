@@ -12,7 +12,7 @@
 #include "threads/synch.h"
 #include "threads/thread.h"
 
-#define NUM_MLFQS 20 // i added it
+#define NUM_MLFQS 40 // i added it
 struct thread_info 
   {
     int64_t start_time;

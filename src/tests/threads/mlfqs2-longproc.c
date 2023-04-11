@@ -14,7 +14,7 @@
 #define PRIMES_LIMIT 100000 // upper bound for primes search. Tune this
                            // to force each thread to use a
                            // significant fraction of its quantum.
-#define NUM_MLFQS 20 // i added it
+#define NUM_MLFQS 40 // i added it
 struct thread_info 
   {
     int64_t start_time;
