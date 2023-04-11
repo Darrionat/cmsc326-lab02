@@ -96,7 +96,7 @@ static tid_t allocate_tid(void);
 void mlfqs_init(void)
 {
   ASSERT(thread_mlfqs);
-  for (int i = PRI_MAX; i >= 0; i--)
+  for (int i = PRI_MAX; i >= PRI_MIN; i--)
   {
     list_init(&mlfqs_list[i]);
   }
@@ -156,7 +156,7 @@ void reset_all_threads_priority(void)
   enum intr_level old_level;
   old_level = intr_disable();
   int i = PRI_MAX-1;
-  while (i >= 0)
+  while (i >= PRI_MIN)
   {
     while(!list_empty(&mlfqs_list[i])&& &mlfqs_list[i]!=NULL)
     {
@@ -375,7 +375,7 @@ void thread_yield(void)
   {
     if (thread_mlfqs)
     {
-      if (cur->priority == 0 || (thread_ticks < TIME_SLICE * (PRI_MAX - cur->priority + 1)))
+      if (cur->priority == PRI_MIN || (thread_ticks < TIME_SLICE * (PRI_MAX - cur->priority + 1)))
         list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
       else
         list_push_back(&(mlfqs_list[(--cur->priority)]), &cur->elem);
@@ -578,11 +578,11 @@ next_thread_to_run(void)
   }
 
   int i = PRI_MAX;
-  while (list_empty(&mlfqs_list[i]) && i >= 0)
+  while (list_empty(&mlfqs_list[i]) && i >= PRI_MIN)
   {
     i--;
   }
-  if (i == -1)
+  if (i == PRI_MIN-1)
     return idle_thread;
   return list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
 }
