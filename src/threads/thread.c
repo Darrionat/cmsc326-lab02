@@ -26,9 +26,7 @@ static struct list ready_list;
 
 /*a new mlfqs list*/
 
-static struct list mlfqs_list[PRI_MAX -PRI_MIN+ 1];
-
-
+static struct list mlfqs_list[PRI_MAX - PRI_MIN + 1];
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -155,15 +153,13 @@ void reset_all_threads_priority(void)
 {
   enum intr_level old_level;
   old_level = intr_disable();
-  int i = PRI_MAX-1;
-  while (i >= PRI_MIN)
+  for (int i = PRI_MAX - 1; i >= PRI_MIN; i--)
   {
-    while(!list_empty(&mlfqs_list[i])&& &mlfqs_list[i]!=NULL)
+    while (&mlfqs_list[i] != NULL && !list_empty(&mlfqs_list[i]))
     {
-      struct thread *t =list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
+      struct thread *t = list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
       list_push_back(&mlfqs_list[PRI_MAX], &t->elem);
     }
-    i--;
   }
   thread_foreach(reset_priority_value, NULL);
   intr_set_level(old_level);
@@ -582,7 +578,7 @@ next_thread_to_run(void)
   {
     i--;
   }
-  if (i == PRI_MIN-1)
+  if (i == PRI_MIN - 1)
     return idle_thread;
   return list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
 }
