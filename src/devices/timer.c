@@ -206,10 +206,10 @@ timer_interrupt(struct intr_frame *args UNUSED)
 
   thread_foreach(check_asleep, NULL);
 
-  if ((timer_ticks() % MLFQS_PQ_RESET_TIME == 0)&&(timer_ticks()!=0))
-  {
-    reset_all_threads_priority();
-  }
+  // if ((timer_ticks() % MLFQS_PQ_RESET_TIME == 0)&&(timer_ticks()!=0)&&thread_mlfqs)
+  // {
+  //   reset_all_threads_priority();
+  // }
 
   // thread *curItem = list_head(&sleeping_threads);
   // while (curItem != list_tail(&sleeping_threads)){

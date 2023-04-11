@@ -26,7 +26,9 @@ static struct list ready_list;
 
 /*a new mlfqs list*/
 
-static struct list mlfqs_list[PRI_MAX + 1];
+static struct list mlfqs_list[PRI_MAX -PRI_MIN+ 1];
+
+
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -94,7 +96,6 @@ static tid_t allocate_tid(void);
 void mlfqs_init(void)
 {
   ASSERT(thread_mlfqs);
-  list_init(&mlfqs_list);
   for (int i = PRI_MAX; i >= 0; i--)
   {
     list_init(&mlfqs_list[i]);
@@ -145,20 +146,6 @@ value_less(const struct list_elem *a_, const struct list_elem *b_,
 }
 
 static void
-reset_priority_queue(struct thread *t, void *aux)
-{
-
-  if (t->status == THREAD_READY)
-  {
-    // Remove from current priority queue
-    list_remove(&(t->elem));
-    // Push thread to proper pq list
-    list_insert_ordered(&(mlfqs_list[PRI_MAX]), &t->elem, value_less, NULL);
-    //list_push_back(&(mlfqs_list[PRI_MAX]), &t->elem);
-  }
-  t->priority = PRI_MAX;
-}
-static void
 reset_priority_value(struct thread *t, void *aux)
 {
   t->priority = PRI_MAX;
@@ -168,8 +155,17 @@ void reset_all_threads_priority(void)
 {
   enum intr_level old_level;
   old_level = intr_disable();
-  thread_foreach(reset_priority_queue, NULL);
-  //thread_foreach(reset_priority_value, NULL);
+  int i = PRI_MAX-1;
+  while (i >= 0)
+  {
+    while(!list_empty(&mlfqs_list[i])&& &mlfqs_list[i]!=NULL)
+    {
+      struct thread *t =list_entry(list_pop_front(&(mlfqs_list[i])), struct thread, elem);
+      list_push_back(&mlfqs_list[PRI_MAX], &t->elem);
+    }
+    i--;
+  }
+  thread_foreach(reset_priority_value, NULL);
   intr_set_level(old_level);
 }
 // void reset_all_threads_priority(void)
@@ -302,7 +298,6 @@ void thread_unblock(struct thread *t)
   ASSERT(t->status == THREAD_BLOCKED);
   if (thread_mlfqs)
   {
-
     list_push_back(&(mlfqs_list[t->priority]), &t->elem);
   }
   else
@@ -381,9 +376,7 @@ void thread_yield(void)
     if (thread_mlfqs)
     {
       if (cur->priority == 0 || (thread_ticks < TIME_SLICE * (PRI_MAX - cur->priority + 1)))
-      {
         list_push_back(&(mlfqs_list[(cur->priority)]), &cur->elem);
-      }
       else
         list_push_back(&(mlfqs_list[(--cur->priority)]), &cur->elem);
     }
