@@ -105,12 +105,11 @@ void thread_init(void)
   ASSERT(intr_get_level() == INTR_OFF);
 
   lock_init(&tid_lock);
-  list_init(&ready_list);
   list_init(&all_list);
   if (thread_mlfqs)
-  {
     mlfqs_init();
-  }
+  else
+    list_init(&ready_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread();
@@ -134,19 +133,20 @@ void thread_start(void)
   /* Wait for the idle thread to initialize idle_thread. */
   sema_down(&idle_started);
 }
-value_less(const struct list_elem *a_, const struct list_elem *b_,
-           void *aux UNUSED)
-{
-  const struct thread *a = list_entry(a_, struct thread, elem);
-  const struct thread *b = list_entry(b_, struct thread, elem);
+// value_less(const struct list_elem *a_, const struct list_elem *b_,
+//            void *aux UNUSED)
+// {
+//   const struct thread *a = list_entry(a_, struct thread, elem);
+//   const struct thread *b = list_entry(b_, struct thread, elem);
 
-  return a->priority > b->priority;
-}
+//   return a->priority > b->priority;
+// }
 
 static void
 reset_priority_value(struct thread *t, void *aux)
 {
-  t->priority = PRI_MAX;
+  if(t->status==THREAD_BLOCKED)
+    t->priority = PRI_MAX;
 }
 
 void reset_all_threads_priority(void)
@@ -155,14 +155,14 @@ void reset_all_threads_priority(void)
   old_level = intr_disable();
   // for (int i = PRI_MAX - 1; i >= PRI_MIN; i--)
   // {
-    while (&mlfqs_list[PRI_MIN] != NULL && !list_empty(&mlfqs_list[PRI_MIN]))
-    {
-      struct thread *t = list_entry(list_pop_front(&(mlfqs_list[PRI_MIN])), struct thread, elem);
-      list_push_back(&mlfqs_list[PRI_MAX], &t->elem);
-      t->priority = PRI_MAX;
-    }
+  while (&mlfqs_list[PRI_MIN] != NULL && !list_empty(&mlfqs_list[PRI_MIN]))
+  {
+    struct thread *t = list_entry(list_pop_front(&(mlfqs_list[PRI_MIN])), struct thread, elem);
+    list_push_back(&mlfqs_list[PRI_MAX], &t->elem);
+    t->priority = PRI_MAX;
+  }
   //}
-  //thread_foreach(reset_priority_value, NULL);
+  thread_foreach(reset_priority_value, NULL);
   intr_set_level(old_level);
 }
 // void reset_all_threads_priority(void)
