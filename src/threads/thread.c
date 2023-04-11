@@ -145,7 +145,7 @@ void thread_start(void)
 static void
 reset_priority_value(struct thread *t, void *aux)
 {
-  if(t->status==THREAD_BLOCKED)
+  if(t->status==THREAD_BLOCKED&& t->priority == 0)
     t->priority = PRI_MAX;
 }
 
